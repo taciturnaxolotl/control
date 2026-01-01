@@ -1,0 +1,13 @@
+{
+  "services": {
+    "map.dunkirk.sh": {
+      "name": "Map",
+      "flags": {
+        "block-map-sse": {
+          "name": "Block SSE Endpoint",
+          "description": "Disable /sse Server-Sent Events"
+        }
+      }
+    }
+  }
+}
