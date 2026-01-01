@@ -3,15 +3,10 @@
     "map.dunkirk.sh": {
       "name": "Map",
       "flags": {
-        "block-map-sse": {
-          "name": "Block SSE Endpoint",
-          "description": "Disable /sse Server-Sent Events",
-          "path": "/sse"
-        },
-        "block-map-players": {
-          "name": "Block Player Markers",
-          "description": "Disable player location tracking",
-          "path": "/tiles/world/markers/pl3xmap_players.json"
+        "block-tracking": {
+          "name": "Block Player Tracking",
+          "description": "Disable real-time player location updates",
+          "paths": ["/sse", "/tiles/world/markers/pl3xmap_players.json"]
         }
       }
     }

@@ -34,7 +34,7 @@ const getAllFlags = db.prepare<{ id: string; enabled: number }, []>(
 export interface FlagDefinition {
   name: string;
   description: string;
-  path?: string; // The path this flag blocks (e.g., "/sse")
+  paths: string[]; // The paths this flag blocks
 }
 
 export interface ServiceDefinition {
@@ -136,10 +136,11 @@ export function shouldBlock(host: string, path: string): boolean {
         continue;
       }
 
-      // Check if the flag applies to this path
-      const flagPath = flag.path || `/${flagId.split("-").pop()}`;
-      if (path === flagPath || path.startsWith(flagPath + "/") || path.startsWith(flagPath + "?")) {
-        return true;
+      // Check if any of the flag's paths match
+      for (const flagPath of flag.paths) {
+        if (path === flagPath || path.startsWith(flagPath + "/") || path.startsWith(flagPath + "?")) {
+          return true;
+        }
       }
     }
   }

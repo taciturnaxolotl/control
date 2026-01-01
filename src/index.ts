@@ -33,7 +33,8 @@ app.get("/client-metadata.json", (c) => {
   return c.json({
     client_id: CLIENT_ID,
     client_name: "Control Panel",
-    logo_uri: "https://hc-cdn.hel1.your-objectstorage.com/s/v3/d19f900e04238dcd_control.png",
+    logo_uri:
+      "https://hc-cdn.hel1.your-objectstorage.com/s/v3/d19f900e04238dcd_control.png",
     redirect_uris: [REDIRECT_URI],
   });
 });

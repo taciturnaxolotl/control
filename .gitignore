@@ -4,3 +4,4 @@ dist/
 flags/
 *.log
 .DS_Store
+data/
