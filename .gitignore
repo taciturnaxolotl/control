@@ -5,3 +5,4 @@ flags/
 *.log
 .DS_Store
 data/
+flags.json
