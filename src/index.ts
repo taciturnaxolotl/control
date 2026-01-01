@@ -39,6 +39,10 @@ app.get("/client-metadata.json", (c) => {
   });
 });
 
+app.get("/health", (c) => {
+  return c.json({ status: "ok" });
+});
+
 // Kill-check endpoint for Caddy to call before proxying protected routes
 // Returns 200 to allow, 503 to block
 // No auth required - this is called by Caddy internally
