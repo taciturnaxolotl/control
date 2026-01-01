@@ -1,5 +1,7 @@
 # Control
 
+![screenshot](https://hc-cdn.hel1.your-objectstorage.com/s/v3/f566255f04dab183_image.png)
+
 This servers as the source of truth for whether stuff is enabled or not.
 
 The canonical repo for this is hosted on tangled over at [`dunkirk.sh/con trol`](https://tangled.org/@dunkirk.sh/control)
