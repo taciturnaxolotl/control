@@ -1,7 +1,13 @@
 import { Database } from "bun:sqlite";
-import flagsConfig from "../flags.json";
 
 const DB_PATH = process.env.DATABASE_PATH || "./data/control.db";
+const FLAGS_CONFIG_PATH = process.env.FLAGS_CONFIG || "./flags.json";
+
+// Load flags config from file (path from env or default)
+const flagsConfig = await Bun.file(FLAGS_CONFIG_PATH).json().catch(() => {
+  // Fallback to local flags.json if FLAGS_CONFIG path doesn't exist
+  return import("../flags.json").then(m => m.default);
+});
 
 // Initialize database
 const db = new Database(DB_PATH, { create: true });

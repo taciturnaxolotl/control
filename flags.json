@@ -7,6 +7,11 @@
           "name": "Block SSE Endpoint",
           "description": "Disable /sse Server-Sent Events",
           "path": "/sse"
+        },
+        "block-map-players": {
+          "name": "Block Player Markers",
+          "description": "Disable player location tracking",
+          "path": "/tiles/world/markers/pl3xmap_players.json"
         }
       }
     }
