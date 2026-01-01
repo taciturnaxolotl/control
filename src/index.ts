@@ -18,6 +18,7 @@ import {
   getFlagStatus,
   setFlag,
   getFlagDefinition,
+  shouldBlock,
 } from "./flags";
 
 import homepage from "../public/index.html";
@@ -35,6 +36,20 @@ app.get("/client-metadata.json", (c) => {
     logo_uri: "https://hc-cdn.hel1.your-objectstorage.com/s/v3/d19f900e04238dcd_control.png",
     redirect_uris: [REDIRECT_URI],
   });
+});
+
+// Kill-check endpoint for Caddy to call before proxying protected routes
+// Returns 200 to allow, 503 to block
+// No auth required - this is called by Caddy internally
+app.get("/kill-check", (c) => {
+  const host = c.req.header("X-Orig-Host") || c.req.header("Host") || "";
+  const path = c.req.header("X-Orig-Path") || "/";
+
+  if (shouldBlock(host, path)) {
+    return c.text("Temporarily disabled", 503);
+  }
+
+  return c.text("OK", 200);
 });
 
 app.get("/auth/login", (c) => {
@@ -99,12 +114,12 @@ api.get("/session", async (c) => {
 api.use("/flags/*", apiAuthMiddleware);
 api.use("/flags", apiAuthMiddleware);
 
-api.get("/flags", async (c) => {
-  const flags = await getAllFlagsStatus();
+api.get("/flags", (c) => {
+  const flags = getAllFlagsStatus();
   return c.json(flags);
 });
 
-api.get("/flags/:name", async (c) => {
+api.get("/flags/:name", (c) => {
   const name = c.req.param("name");
   const definition = getFlagDefinition(name);
 
@@ -112,7 +127,7 @@ api.get("/flags/:name", async (c) => {
     return c.json({ error: "Unknown flag" }, 404);
   }
 
-  const enabled = await getFlagStatus(name);
+  const enabled = getFlagStatus(name);
   return c.json({
     id: name,
     name: definition.flag.name,
@@ -135,11 +150,11 @@ api.put("/flags/:name", async (c) => {
     return c.json({ error: "Invalid body: enabled must be boolean" }, 400);
   }
 
-  await setFlag(name, body.enabled);
+  setFlag(name, body.enabled);
   return c.json({ id: name, enabled: body.enabled });
 });
 
-api.delete("/flags/:name", async (c) => {
+api.delete("/flags/:name", (c) => {
   const name = c.req.param("name");
   const definition = getFlagDefinition(name);
 
@@ -147,7 +162,7 @@ api.delete("/flags/:name", async (c) => {
     return c.json({ error: "Unknown flag" }, 404);
   }
 
-  await setFlag(name, false);
+  setFlag(name, false);
   return c.json({ id: name, enabled: false });
 });
 

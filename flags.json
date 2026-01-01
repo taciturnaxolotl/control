@@ -5,7 +5,8 @@
       "flags": {
         "block-map-sse": {
           "name": "Block SSE Endpoint",
-          "description": "Disable /sse Server-Sent Events"
+          "description": "Disable /sse Server-Sent Events",
+          "path": "/sse"
         }
       }
     }
