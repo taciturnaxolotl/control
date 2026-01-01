@@ -121,6 +121,21 @@ export function getAllFlagsStatus(): Record<string, FlagStatus[]> {
   return result;
 }
 
+// Match a path pattern against a request path (supports * wildcard for single segment)
+function matchPath(pattern: string, path: string): boolean {
+  if (!pattern.includes("*")) {
+    return path === pattern || path.startsWith(pattern + "/") || path.startsWith(pattern + "?");
+  }
+  
+  // Convert pattern to regex: * matches any single path segment
+  const regexPattern = pattern
+    .replace(/[.+^${}()|[\]\\]/g, "\\$&") // escape regex special chars except *
+    .replace(/\*/g, "[^/]+"); // * matches one path segment
+  
+  const regex = new RegExp(`^${regexPattern}($|\\?|/)`);
+  return regex.test(path);
+}
+
 // Check if a request should be blocked based on host and path
 export function shouldBlock(host: string, path: string): boolean {
   const config = getConfig();
@@ -137,9 +152,9 @@ export function shouldBlock(host: string, path: string): boolean {
         continue;
       }
 
-      // Check if any of the flag's paths match
+      // Check if any of the flag's paths match (supports * wildcard)
       for (const flagPath of flag.paths) {
-        if (path === flagPath || path.startsWith(flagPath + "/") || path.startsWith(flagPath + "?")) {
+        if (matchPath(flagPath, path)) {
           return true;
         }
       }
