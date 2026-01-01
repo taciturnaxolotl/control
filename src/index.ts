@@ -19,6 +19,7 @@ import {
   setFlag,
   getFlagDefinition,
   shouldBlock,
+  getRedactions,
 } from "./flags";
 
 import homepage from "../public/index.html";
@@ -55,6 +56,40 @@ app.get("/kill-check", (c) => {
   }
 
   return c.text("OK", 200);
+});
+
+// Proxy JSON endpoint and redact configured fields
+app.get("/proxy/*", async (c) => {
+  const host = c.req.header("X-Orig-Host") || c.req.header("Host") || "";
+  const origPath = c.req.header("X-Orig-Path") || "";
+  const backendUrl = c.req.header("X-Backend-Url");
+  
+  if (!backendUrl) {
+    return c.text("Missing X-Backend-Url header", 400);
+  }
+
+  const res = await fetch(backendUrl);
+  if (!res.ok) {
+    return c.text("Backend error", res.status);
+  }
+
+  const data = await res.json();
+
+  // Redact fields based on config
+  const fieldsToRedact = getRedactions(host, origPath);
+  for (const field of fieldsToRedact) {
+    if (field in data) {
+      if (Array.isArray(data[field])) {
+        data[field] = [];
+      } else if (typeof data[field] === "object" && data[field] !== null) {
+        data[field] = {};
+      } else {
+        delete data[field];
+      }
+    }
+  }
+
+  return c.json(data);
 });
 
 app.get("/auth/login", (c) => {

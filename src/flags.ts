@@ -35,6 +35,7 @@ export interface FlagDefinition {
   name: string;
   description: string;
   paths: string[]; // The paths this flag blocks
+  redact?: Record<string, string[]>; // path -> fields to strip from JSON
 }
 
 export interface ServiceDefinition {
@@ -146,4 +147,32 @@ export function shouldBlock(host: string, path: string): boolean {
   }
 
   return false;
+}
+
+// Get fields to redact from a JSON response based on host and path
+export function getRedactions(host: string, path: string): string[] {
+  const config = getConfig();
+  const fields: string[] = [];
+
+  for (const [serviceId, service] of Object.entries(config.services)) {
+    if (!host.includes(serviceId) && !serviceId.includes(host)) {
+      continue;
+    }
+
+    for (const [flagId, flag] of Object.entries(service.flags)) {
+      if (!getFlagStatus(flagId)) {
+        continue;
+      }
+
+      if (flag.redact) {
+        for (const [redactPath, redactFields] of Object.entries(flag.redact)) {
+          if (path === redactPath || path.startsWith(redactPath + "?")) {
+            fields.push(...redactFields);
+          }
+        }
+      }
+    }
+  }
+
+  return fields;
 }
